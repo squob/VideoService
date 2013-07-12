@@ -46,7 +46,7 @@ public class MainActivity extends Activity implements OnItemClickListener {
 	String downloadSong;
 	String downloadSongName;
 	File song;
-	FileWriter fw;
+	FileOutputStream fw;
 
 	public void suchen(View view) {
 
@@ -65,7 +65,7 @@ public class MainActivity extends Activity implements OnItemClickListener {
 
 					if (!eText[2].getText().toString().isEmpty()) {
 						zahl = Long.parseLong(eText[2].getText().toString());
-						zahl = zahl * 8388608;
+						zahl = zahl * 1048576;
 					}
 					Log.i("AudioSuche", "Blödsinn" + zahl.toString());
 					jOkbject.put("Groesse", zahl.toString());
@@ -170,7 +170,7 @@ public class MainActivity extends Activity implements OnItemClickListener {
 				e1.printStackTrace();
 			}
 			startDownload(arg1);
-			
+
 		}
 	}
 
@@ -185,7 +185,7 @@ public class MainActivity extends Activity implements OnItemClickListener {
 				.substring(downloadSong.lastIndexOf("/"));
 		Log.v("Ausgelesen", "NAME: " + downloadSongName);
 		song = new File(SAVEPATH + downloadSongName);
-		fw = new FileWriter(song);
+		FileOutputStream fw = new FileOutputStream(song);
 	}
 
 	public void startDownload(View view) {
@@ -196,25 +196,42 @@ public class MainActivity extends Activity implements OnItemClickListener {
 				Looper.prepare();
 				// TODO Auto-generated method stub
 				try {
+					int filesize = 0;
+					int bytesRead;
+					int current = 0;
 
 					clientSocket = new Socket("127.0.0.1", 5001);
 					// Anfrage
-					irgendeinname2 = new PrintStream(clientSocket
-							.getOutputStream());
+					irgendeinname2 = new PrintStream(
+							clientSocket.getOutputStream());
 					Log.i("AudioSucheD", "AN CLIENT " + downloadSong);
 					irgendeinname2.println(downloadSong);
 					Log.v("AudioSucheD", "Speicherort: " + SAVEPATH
 							+ downloadSongName);
-					//Antwort
-					BufferedReader bufferedReader = new BufferedReader(
-							new InputStreamReader(clientSocket.getInputStream()));
-					String str;
+
 					
-					while ((str = bufferedReader.readLine()) != null) {
-						// Log.v("AudioSucheD", "VOM SERVER:" + str);
-						fw.write(str);
-					}
+					// Antwort
+					InputStream is = clientSocket.getInputStream();
+					filesize = 13400000; // is.available();
+					Log.v("Ausgelesen", "filesize ist " + filesize);
+					byte[] mybytearray = new byte[filesize];
+					bytesRead = is.read(mybytearray, 0, mybytearray.length);
+					current = bytesRead;
+					Log.v("Ausgelesen", "Starte! mit bereits " + current
+							+ " bytes!");
+					do {
+						System.out.print("|");
+						bytesRead = is.read(mybytearray, current,
+								(mybytearray.length - current));
+						if (bytesRead >= 0)
+							current += bytesRead;
+					} while (bytesRead > -1);
+
+					fw.write(mybytearray, 0, current);
+					fw.flush();
+
 					Log.v("Ausgelesen", "Fertig!");
+					is.close();
 					clientSocket.close();
 					Log.v("AudioSucheD", "ClientSocket closed");
 				} catch (Exception ex) {
