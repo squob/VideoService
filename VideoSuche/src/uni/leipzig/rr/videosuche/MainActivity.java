@@ -208,14 +208,13 @@ public class MainActivity extends Activity implements OnItemClickListener {
 					//Antwort
 					BufferedReader bufferedReader = new BufferedReader(
 							new InputStreamReader(clientSocket.getInputStream()));
-					String str = bufferedReader.readLine();
+					String str;
 					
-					while (str != null) {
+					while ((str = bufferedReader.readLine()) != null) {
 						// Log.v("AudioSucheD", "VOM SERVER:" + str);
 						fw.write(str);
-						str = bufferedReader.readLine();
 					}
-
+					Log.v("Ausgelesen", "Fertig!");
 					clientSocket.close();
 					Log.v("AudioSucheD", "ClientSocket closed");
 				} catch (Exception ex) {
