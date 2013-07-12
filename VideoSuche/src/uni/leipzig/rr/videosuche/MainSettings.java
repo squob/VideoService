@@ -29,6 +29,24 @@ public class MainSettings extends Activity{
 	
 	
 	public void saveAndBack(View view) throws IOException {
+		Log.v("ASSettings", "Speicherort: " + SAVEPATH+File.separator+et.getText() +"###########");
+		File directory = new File(SAVEPATH+File.separator+et.getText() );
+	    if(!directory.exists() && !directory.isDirectory()) 
+	    {
+	        if (directory.mkdirs())
+	        {
+	            Log.i("Erstelle Verzeichnis","Verzeichnis erstellt");
+	        }
+	        else
+	        {
+	            Log.w("Erstelle Verzeichnis","Verzeichnis konnte nicht erstellt werden");
+	        }
+	    }
+	    else
+	    {
+	        Log.i("Erstelle Verzeichnis","Verzeichnis schon vorhanden");
+	    }
+		
 		
 		File f = new File(SAVEPATH + "/pfad.txt");
 		if (!f.createNewFile()) {
