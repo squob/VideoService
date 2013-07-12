@@ -45,6 +45,8 @@ public class MainActivity extends Activity implements OnItemClickListener {
 	ArrayAdapter<String> ada;
 	String downloadSong;
 	String downloadSongName;
+	File song;
+	FileWriter fw;
 
 	public void suchen(View view) {
 
@@ -143,7 +145,8 @@ public class MainActivity extends Activity implements OnItemClickListener {
 		// TODO Auto-generated method stub
 		super.onResume();
 		try {
-			BufferedReader buff = new BufferedReader(new FileReader( new File(SAVEPATH + "/pfad.txt")));
+			BufferedReader buff = new BufferedReader(new FileReader(new File(
+					SAVEPATH + "/pfad.txt")));
 			SAVEPATH = buff.readLine();
 			buff.close();
 		} catch (Exception ex) {
@@ -159,12 +162,26 @@ public class MainActivity extends Activity implements OnItemClickListener {
 
 		if (arg0.getId() == R.id.listView1) {
 			Log.v("AudioSuche", "Item wurde geklickt.");
-			startDownload(arg1, arg2);
+
+			try {
+				prepareDownload(arg2);
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+			startDownload(arg1);
+			try {
+				fw.close();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 	}
 
-	public void startDownload(View view, int l) {
-
+	public void prepareDownload(int l) throws IOException {
+		File Ordner = new File(SAVEPATH);
+		Ordner.mkdir();
 		ListView lv = (ListView) findViewById(R.id.listView1);
 		ArrayAdapter<String> aa = (ArrayAdapter<String>) lv.getAdapter();
 		downloadSong = aa.getItem(l);
@@ -172,43 +189,38 @@ public class MainActivity extends Activity implements OnItemClickListener {
 		downloadSongName = downloadSong
 				.substring(downloadSong.lastIndexOf("/"));
 		Log.v("Ausgelesen", "NAME: " + downloadSongName);
+		song = new File(SAVEPATH + downloadSongName);
+		fw = new FileWriter(song);
+	}
 
-		File Ordner = new File(SAVEPATH);
-		Ordner.mkdir();
-
+	public void startDownload(View view) {
 		sT2 = new Thread(new Runnable() {
 			@Override
 			public void run() {
-				FileWriter fw;
-				
+
 				Looper.prepare();
 				// TODO Auto-generated method stub
 				try {
 
 					clientSocket = new Socket("127.0.0.1", 5001);
-
+					// Anfrage
 					irgendeinname2 = new PrintStream(clientSocket
 							.getOutputStream());
 					Log.i("AudioSucheD", "AN CLIENT " + downloadSong);
 					irgendeinname2.println(downloadSong);
-					Log.v("AudioSucheD", "Speicherort: " + SAVEPATH + downloadSongName);
+					Log.v("AudioSucheD", "Speicherort: " + SAVEPATH
+							+ downloadSongName);
+					//Antwort
 					BufferedReader bufferedReader = new BufferedReader(
 							new InputStreamReader(clientSocket.getInputStream()));
 					String str = bufferedReader.readLine();
-					File song = new File(SAVEPATH + downloadSongName);
-					fw = new FileWriter(song);
-					if (str.equals("null")) {
-						Toast.makeText(MainActivity.this,
-								"Kein Ergebnis. Such anständig",
-								Toast.LENGTH_SHORT).show();
-					} else {
-						while (!str.equals("EOF")) {
-							Log.v("AudioSucheD", "VOM SERVER:" + str);
-							fw.write(str);
-							str = bufferedReader.readLine();
-						}
-						fw.close();
+
+					if (str != null) {
+						// Log.v("AudioSucheD", "VOM SERVER:" + str);
+						fw.write(str);
+						str = bufferedReader.readLine();
 					}
+
 					clientSocket.close();
 					Log.v("AudioSucheD", "ClientSocket closed");
 				} catch (Exception ex) {
