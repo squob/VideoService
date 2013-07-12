@@ -7,6 +7,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import android.app.Activity;
+import android.app.LauncherActivity.ListItem;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Environment;
@@ -17,15 +18,18 @@ import android.util.JsonReader;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
 
-public class MainActivity extends Activity {
-	
-	String SAVEPATH; 
-	Thread sT, clientThread;
+public class MainActivity extends Activity implements OnItemClickListener {
+
+	String SAVEPATH;
+	Thread sT, sT2, clientThread;
 	Socket clientSocket;
 	int filesize;
 	int bytesRead, current;
@@ -33,12 +37,15 @@ public class MainActivity extends Activity {
 	String resultString;
 	JsonReader jreader;
 	JSONObject jOkbject, jso;
+	JSONObject jOkbject2, jso2;
 	JSONArray jsoARR;
 	EditText[] eText;
 	ListView ergebnisse;
-	PrintStream irgendeinname;
+	PrintStream irgendeinname, irgendeinname2;
 	ArrayAdapter<String> ada;
-	
+	String downloadSong;
+	String downloadSongName;
+
 	public void suchen(View view) {
 
 		sT = new Thread(new Runnable() {
@@ -91,8 +98,7 @@ public class MainActivity extends Activity {
 					Log.v("AudioSuche", "ClientSocket closed");
 				} catch (Exception ex) {
 					Log.e("AudioSuche", "ERROR: " + ex.toString());
-					Toast.makeText(MainActivity.this, ex.toString(), 1)
-							.show();
+					Toast.makeText(MainActivity.this, ex.toString(), 1).show();
 				}
 			}
 		});
@@ -112,11 +118,6 @@ public class MainActivity extends Activity {
 		}
 	};
 
-	/**
-	 * Aktualisiert den Spinner und nach jedem Hinzufuegen wird diese in der
-	 * Datei gespeichert somit wuerde ein Systemabsturz noch wenigstens noch ein
-	 * paar Daten besitzen
-	 */
 	public void aktualisiereAnzeige(String serverNachricht) {
 		// Speichert den String als erstes Element des Spinners
 		Log.v("AudioSuche", "Servernachricht:" + serverNachricht);
@@ -128,11 +129,6 @@ public class MainActivity extends Activity {
 		// speichereDatei();
 	}
 
-	/**
-	 * Aktualisiert den Spinner und nach jedem Hinzufuegen wird diese in der
-	 * Datei gespeichert somit wuerde ein Systemabsturz noch wenigstens noch ein
-	 * paar Daten besitzen
-	 */
 	public void loescheAnzeige() {
 		// Speichert den String als erstes Element des Spinners
 		ada.clear();
@@ -155,12 +151,77 @@ public class MainActivity extends Activity {
 			SAVEPATH = buff.readLine();
 			buff.close();
 		} catch (Exception ex) {
-			Log.w("AudioSuche", "Keine Datei am angegebenen Speicherort. (Beim ersten Lauf normal)");
+			Log.w("AudioSuche",
+					"Keine Datei am angegebenen Speicherort. (Beim ersten Lauf ist das normal)");
 			SAVEPATH = Environment.getExternalStorageDirectory().getPath();
 		}
-		
 	}
-	
+
+	@Override
+	public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
+		// TODO Auto-generated method stub
+		Log.v("AudioSuche", R.id.listView1 + ": and " + arg1.getId());
+		if (arg0.getId() == R.id.listView1) {
+			Log.v("AudioSuche", "Item wurde geklickt.");
+			startDownload(arg1, arg2);
+		}
+	}
+
+	public void startDownload(View view, int l) {
+
+		ListView lv = (ListView) findViewById(R.id.listView1);
+		ArrayAdapter<String> aa = (ArrayAdapter<String>) lv.getAdapter();
+		downloadSong = aa.getItem(l);
+		Log.v("Ausgelesen", downloadSong);
+		downloadSongName = downloadSong
+				.substring(downloadSong.lastIndexOf("/"));
+		Log.v("Ausgelesen", "NAME: " + downloadSongName);
+
+		sT2 = new Thread(new Runnable() {
+			@Override
+			public void run() {
+				Log.v("AudioSucheD", "Speicherort: " + SAVEPATH);
+				Looper.prepare();
+				// TODO Auto-generated method stub
+				try {
+
+					clientSocket = new Socket("127.0.0.1", 5001);
+
+					Log.i("AudioSucheD", "1");
+					jOkbject2.put("Song", downloadSong);
+					Log.i("AudioSucheD", "2");
+					irgendeinname2 = new PrintStream(clientSocket
+							.getOutputStream());
+					Log.i("AudioSucheD", "AN CLIENT " + jOkbject2.toString());
+					irgendeinname2.println(jOkbject2.toString());
+
+					BufferedReader bufferedReader = new BufferedReader(
+							new InputStreamReader(clientSocket.getInputStream()));
+					String str = bufferedReader.readLine();
+
+					if (str.equals("null")) {
+						Toast.makeText(MainActivity.this,
+								"Kein Ergebnis. Such anständig",
+								Toast.LENGTH_SHORT).show();
+					} else {
+						while (!str.equals("")) {
+
+							Log.v("AudioSucheD", "VOM SERVER:" + str);
+							File song = new File(SAVEPATH + downloadSongName);
+							str = bufferedReader.readLine();
+						}
+					}
+					clientSocket.close();
+					Log.v("AudioSucheD", "ClientSocket closed");
+				} catch (Exception ex) {
+					Log.e("AudioSucheD", "ERROR: " + ex.toString());
+					Toast.makeText(MainActivity.this, ex.toString(), 1).show();
+				}
+			}
+		});
+		sT2.start();
+	}
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -169,22 +230,25 @@ public class MainActivity extends Activity {
 		eText[0] = (EditText) findViewById(R.id.eTsavePath);
 		eText[1] = (EditText) findViewById(R.id.editText2);
 		eText[2] = (EditText) findViewById(R.id.editText3);
-		
+
+		ListView lview = (ListView) findViewById(R.id.listView1);
+		lview.setOnItemClickListener(this);
+
 		SAVEPATH = Environment.getExternalStorageDirectory().getPath();
 		Log.v("AudioSuche", "Speicherort: " + SAVEPATH);
-	
-		
+
 		for (EditText e : eText) {
 			e.setSelectAllOnFocus(true);
 		}
-		
+
 		jOkbject = new JSONObject();
-		
+		jOkbject2 = new JSONObject();
+
 		ada = new ArrayAdapter<String>(this,
 				android.R.layout.simple_list_item_1);
 		ergebnisse = (ListView) findViewById(R.id.listView1);
 		ergebnisse.setAdapter(ada);
-
+		downloadSong = "";
 	}
 
 	@Override
@@ -193,4 +257,5 @@ public class MainActivity extends Activity {
 		getMenuInflater().inflate(R.menu.main, menu);
 		return true;
 	}
+
 }
