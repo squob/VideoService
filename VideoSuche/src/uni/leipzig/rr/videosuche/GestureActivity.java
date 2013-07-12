@@ -35,7 +35,7 @@ public class GestureActivity extends Activity implements OnGesturePerformedListe
 		// TODO Auto-generated method stub
 		super.onCreate(savedInstanceState);
 		
-		eText = (EditText)findViewById(R.id.editText1);
+		eText = (EditText)findViewById(R.id.eTsavePath);
 		eText.setText("Hier Suchbegriffe eingeben..");
 		eText.setSelectAllOnFocus(true);
 		

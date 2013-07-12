@@ -6,5 +6,8 @@
     <string name="hello_world">Hello world!</string>
     <string name="Titel2">Zu suchende Begriffe:</string>
     <string name="maxGroesse">MB</string>
+    <string name="settingsCaption">Einstellungen</string>
+    <string name="settingsPath">Speicherort der Dateien</string>
+    <string name="settingsSaveAndBack">Speichern und zurück</string>
 
 </resources>

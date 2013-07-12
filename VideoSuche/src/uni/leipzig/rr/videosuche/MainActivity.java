@@ -199,7 +199,7 @@ public class MainActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		eText = new EditText[3];
-		eText[0] = (EditText) findViewById(R.id.editText1);
+		eText[0] = (EditText) findViewById(R.id.eTsavePath);
 		eText[1] = (EditText) findViewById(R.id.editText2);
 		eText[2] = (EditText) findViewById(R.id.editText3);
 

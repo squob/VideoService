@@ -29,6 +29,7 @@
             <category android:name="android.intent.category.DEFAULT" />
         	</intent-filter>
     	</activity>
+        <activity android:name="MainSettings" android:launchMode="singleTask" android:label="Settings"></activity>
     </application>
 
 </manifest>
