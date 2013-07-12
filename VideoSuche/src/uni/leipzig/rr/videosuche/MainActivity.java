@@ -170,12 +170,7 @@ public class MainActivity extends Activity implements OnItemClickListener {
 				e1.printStackTrace();
 			}
 			startDownload(arg1);
-			try {
-				fw.close();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			
 		}
 	}
 
@@ -214,8 +209,8 @@ public class MainActivity extends Activity implements OnItemClickListener {
 					BufferedReader bufferedReader = new BufferedReader(
 							new InputStreamReader(clientSocket.getInputStream()));
 					String str = bufferedReader.readLine();
-
-					if (str != null) {
+					
+					while (str != null) {
 						// Log.v("AudioSucheD", "VOM SERVER:" + str);
 						fw.write(str);
 						str = bufferedReader.readLine();
@@ -225,6 +220,12 @@ public class MainActivity extends Activity implements OnItemClickListener {
 					Log.v("AudioSucheD", "ClientSocket closed");
 				} catch (Exception ex) {
 					Log.e("AudioSucheD", "ERROR: " + ex.toString());
+				}
+				try {
+					fw.close();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
 				}
 			}
 		});
