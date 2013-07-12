@@ -102,7 +102,8 @@ public class MainActivity extends Activity {
 					clientSocket.close();
 					Log.v("AudioSuche", "ClientSocket closed");
 				} catch (Exception ex) {
-					Toast.makeText(getApplicationContext(), ex.toString(), 1)
+					Log.e("AudioSuche", "ERROR: " + ex.toString());
+					Toast.makeText(MainActivity.this, ex.toString(), 1)
 							.show();
 				}
 			}
