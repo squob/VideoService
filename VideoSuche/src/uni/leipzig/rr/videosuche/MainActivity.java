@@ -51,10 +51,10 @@ public class MainActivity extends Activity {
 	ListView ergebnisse;
 	PrintStream irgendeinname;
 	ArrayAdapter<String> ada;
-	
 
 	public void suchen(View view) {
-
+		
+		Log.v("VideoSuche", "Suchbutton geklickt.");
 		sT = new Thread(new Runnable() {
 			@Override
 			public void run() {
@@ -67,13 +67,13 @@ public class MainActivity extends Activity {
 					Log.i("debug2", "2");
 					jOkbject.put("Kommentar", eText[1].getText());
 					Log.i("debug2", "3");
-					
+
 					Long zahl = Long.parseLong(eText[2].getText().toString());
 					zahl = zahl * 8388608;
 					Log.i("Blˆdsinn", zahl.toString());
 					jOkbject.put("Groesse", zahl);
 					Log.i("debug2", "4");
-					
+
 					irgendeinname = new PrintStream(clientSocket
 							.getOutputStream());
 					Log.i("debug2", jOkbject.toString());
@@ -83,20 +83,21 @@ public class MainActivity extends Activity {
 							new InputStreamReader(clientSocket.getInputStream()));
 					String str = bufferedReader.readLine();
 					Log.v("AusgabeSongs", "VOM SERVER:" + str);
-					
+
 					if (str.equals("null")) {
-						Toast.makeText(MainActivity.this, "Kein Ergebnis. Such anst‰ndig", Toast.LENGTH_SHORT).show();
-					}
-					else {
+						Toast.makeText(MainActivity.this,
+								"Kein Ergebnis. Such anst‰ndig",
+								Toast.LENGTH_SHORT).show();
+					} else {
 						Message nachr = Message.obtain();
 						jso = new JSONObject(str);
 						String s = jso.getString("Songs");
 						s = s.substring(2, s.length());
-						s = s.substring(0, s.length() -2);
+						s = s.substring(0, s.length() - 2);
 						String[] sa = s.split("\",\"");
-						
+
 						Log.v("AusgabeSongs", s);
-	
+
 						nachr.obj = s.toString();
 						mHandler.sendMessage(nachr);
 					}
@@ -110,90 +111,50 @@ public class MainActivity extends Activity {
 		});
 		sT.start();
 	}
-	// Uebergibt die Nachricht 
-		Handler mHandler = new Handler() {
-			public void handleMessage(Message nachricht) {
-				Log.v("AusgabeSongs",nachricht.obj.toString());
-				String[] data = nachricht.obj.toString().split("\",\"");
-				loescheAnzeige();
-				for (String string : data) {
-					aktualisiereAnzeige(string);					
-				}
-				
-				
+
+	// Uebergibt die Nachricht
+	Handler mHandler = new Handler() {
+		public void handleMessage(Message nachricht) {
+			Log.v("AusgabeSongs", nachricht.obj.toString());
+			String[] data = nachricht.obj.toString().split("\",\"");
+			loescheAnzeige();
+			for (String string : data) {
+				aktualisiereAnzeige(string);
 			}
-		};
-		/**
-		 * Aktualisiert den Spinner und nach jedem Hinzufuegen wird diese in der Datei gespeichert 
-		 * somit wuerde ein Systemabsturz noch wenigstens noch ein paar Daten besitzen
-		 */
-		public void aktualisiereAnzeige(String serverNachricht) {
-			// Speichert den String als erstes Element des Spinners 
-			ada.insert(serverNachricht, 0);
-			// Speichert Spinnerdaten
-			//speichereDatei();
-		}	
-		/**
-		 * Aktualisiert den Spinner und nach jedem Hinzufuegen wird diese in der Datei gespeichert 
-		 * somit wuerde ein Systemabsturz noch wenigstens noch ein paar Daten besitzen
-		 */
-		public void loescheAnzeige() {
-			// Speichert den String als erstes Element des Spinners 
-			ada.clear();
-			// Speichert Spinnerdaten
-			//speichereDatei();
+
 		}
+	};
 
-	/*
-	 * Mit jedem Buttonklick wird die Verbindung zum Server aufgebaut und dem
-	 * Client wird eine Zufallszahl uebergeben anschliessend wird die Zahl lokal
-	 * in der Datei hinzugefuegt
-	 * 
-	 * @param view
+	/**
+	 * Aktualisiert den Spinner und nach jedem Hinzufuegen wird diese in der
+	 * Datei gespeichert somit wuerde ein Systemabsturz noch wenigstens noch ein
+	 * paar Daten besitzen
 	 */
-//	public void Start(View view) {
-//		clientThread = new Thread(new Runnable() {
-//			/**
-//			 * Starten des Threads, hierbei wird aus Port 5000 des Localhost
-//			 * gelauscht
-//			 */
-//			public void run() {
-//				try {
-//					clientSocket = new Socket("127.0.0.1", 5001);
-//					Message serverMessage = Message.obtain();
-//					PrintStream raus = new PrintStream(
-//							clientSocket.getOutputStream());
-//					raus.println(""); // Gewuenschtes Objekt
-//
-//					// receive file
-//					byte[] bytearray = new byte[filesize];
-//					InputStream is = clientSocket.getInputStream();
-//					FileOutputStream fos = new FileOutputStream(
-//							"/mnt/sdcard/Pictures+/Troja-Tr.MP4");
-//					BufferedOutputStream bos = new BufferedOutputStream(fos);
-//					bytesRead = is.read(bytearray, 0, bytearray.length);
-//					current = bytesRead;
-//
-//					do {
-//						bytesRead = is.read(bytearray, current,
-//								(bytearray.length - current));
-//						if (bytesRead >= 0)
-//							current += bytesRead;
-//					} while (bytesRead > -1);
-//
-//					bos.write(bytearray, 0, current);
-//					bos.flush();
-//					bos.close();
-//					clientSocket.close();
-//
-//				} catch (Exception e) {
-//					e.printStackTrace();
-//				}
-//			}
-//		});
-//		clientThread.start();
-//	}
+	public void aktualisiereAnzeige(String serverNachricht) {
+		// Speichert den String als erstes Element des Spinners
+		ada.insert(serverNachricht, 0);
+		// Speichert Spinnerdaten
+		// speichereDatei();
+	}
 
+	/**
+	 * Aktualisiert den Spinner und nach jedem Hinzufuegen wird diese in der
+	 * Datei gespeichert somit wuerde ein Systemabsturz noch wenigstens noch ein
+	 * paar Daten besitzen
+	 */
+	public void loescheAnzeige() {
+		// Speichert den String als erstes Element des Spinners
+		ada.clear();
+		// Speichert Spinnerdaten
+		// speichereDatei();
+	}
+
+	public void whereAreMySettings(View view) {
+		Intent newIntent = new Intent(this, MainSettings.class);
+		startActivity(newIntent);
+	}
+
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -203,17 +164,17 @@ public class MainActivity extends Activity {
 		eText[1] = (EditText) findViewById(R.id.editText2);
 		eText[2] = (EditText) findViewById(R.id.editText3);
 
-		eText[0].setText("Suche nach Titel");
-		eText[1].setText("Suche nach Kommentar");
-		eText[2].setText("Maximale Groeﬂe");
+//		eText[0].setText("Suche nach Titel");
+//		eText[1].setText("Suche nach Kommentar");
+//		eText[2].setText("Maximale Groeﬂe");
 		for (EditText e : eText) {
 			e.setSelectAllOnFocus(true);
 		}
 		jOkbject = new JSONObject();
-		
-		ada = new ArrayAdapter<String>(this, 
+
+		ada = new ArrayAdapter<String>(this,
 				android.R.layout.simple_list_item_1);
-		ergebnisse = (ListView)findViewById(R.id.listView1);
+		ergebnisse = (ListView) findViewById(R.id.listView1);
 		ergebnisse.setAdapter(ada);
 		// Intent intent = new Intent(getApplicationContext(),
 		// GestureActivity.class);

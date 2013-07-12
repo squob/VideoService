@@ -42,23 +42,26 @@
         android:layout_alignLeft="@+id/textView2"
         android:layout_below="@+id/textView2"
         android:layout_marginTop="15dp"
-        android:ems="10" />
+        android:ems="10"
+        android:hint="@string/vidSucheTitelHint" />
     
     <EditText
         android:id="@+id/editText2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/eTsavePath"
         android:layout_alignLeft="@+id/eTsavePath"
-        android:ems="10" />
+        android:layout_below="@+id/eTsavePath"
+        android:ems="10"
+        android:hint="@string/vidSucheKommentarHint" />
 
      <EditText
          android:id="@+id/editText3"
          android:layout_width="wrap_content"
          android:layout_height="wrap_content"
          android:layout_below="@+id/editText2"
-         android:inputType="number"
-         android:ems="10" >
+         android:ems="10"
+         android:hint="@string/vidSucheGroesseHint"
+         android:inputType="number" >
 
      </EditText>
 
@@ -80,5 +83,14 @@
          android:layout_toRightOf="@+id/editText3"
          android:text="@string/maxGroesse"
          android:textAppearance="?android:attr/textAppearanceSmall" />
+
+     <Button
+         android:id="@+id/button1"
+         android:layout_width="wrap_content"
+         android:layout_height="wrap_content"
+         android:layout_alignRight="@+id/settSaveAnBack"
+         android:layout_below="@+id/settSaveAnBack"
+         android:onClick="whereAreMySettings"
+         android:text="@string/vidSuchButSet" />
     
 </RelativeLayout>

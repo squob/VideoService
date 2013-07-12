@@ -9,5 +9,10 @@
     <string name="settingsCaption">Einstellungen</string>
     <string name="settingsPath">Speicherort der Dateien</string>
     <string name="settingsSaveAndBack">Speichern und zurück</string>
+    <string name="settingsPathHint">BSP: \sdcard\myVids\</string>
+    <string name="vidSucheTitelHint">im Titel</string>
+    <string name="vidSucheKommentarHint">und / oder im Kommentar</string>
+    <string name="vidSucheGroesseHint">und oder kleiner als ...</string>
+    <string name="vidSuchButSet">Set</string>
 
 </resources>
