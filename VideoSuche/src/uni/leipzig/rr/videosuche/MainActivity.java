@@ -53,36 +53,38 @@ public class MainActivity extends Activity {
 	ArrayAdapter<String> ada;
 
 	public void suchen(View view) {
-		
-		Log.v("VideoSuche", "Suchbutton geklickt.");
+
 		sT = new Thread(new Runnable() {
 			@Override
 			public void run() {
 				Looper.prepare();
 				// TODO Auto-generated method stub
 				try {
+					Long zahl = Long.MAX_VALUE;
 					clientSocket = new Socket("127.0.0.1", 5000);
-					Log.i("debug2", "1");
+					Log.i("AudioSuche", "1");
 					jOkbject.put("Titel", eText[0].getText());
-					Log.i("debug2", "2");
+					Log.i("AudioSuche", "2");
 					jOkbject.put("Kommentar", eText[1].getText());
-					Log.i("debug2", "3");
+					Log.i("AudioSuche", "3");
 
-					Long zahl = Long.parseLong(eText[2].getText().toString());
-					zahl = zahl * 8388608;
-					Log.i("Blödsinn", zahl.toString());
-					jOkbject.put("Groesse", zahl);
-					Log.i("debug2", "4");
+					if (!eText[2].getText().toString().isEmpty()) {
+						zahl = Long.parseLong(eText[2].getText().toString());
+						zahl = zahl * 8388608;
+					}
+					Log.i("AudioSuche", "Blödsinn" + zahl.toString());
+					jOkbject.put("Groesse", zahl.toString());
+					Log.i("AudioSuche", "4");
 
 					irgendeinname = new PrintStream(clientSocket
 							.getOutputStream());
-					Log.i("debug2", jOkbject.toString());
+					Log.i("AudioSuche", "AN CLIENT " + jOkbject.toString());
 					irgendeinname.println(jOkbject.toString());
 
 					BufferedReader bufferedReader = new BufferedReader(
 							new InputStreamReader(clientSocket.getInputStream()));
 					String str = bufferedReader.readLine();
-					Log.v("AusgabeSongs", "VOM SERVER:" + str);
+					Log.v("AudioSuche", "VOM SERVER:" + str);
 
 					if (str.equals("null")) {
 						Toast.makeText(MainActivity.this,
@@ -94,15 +96,11 @@ public class MainActivity extends Activity {
 						String s = jso.getString("Songs");
 						s = s.substring(2, s.length());
 						s = s.substring(0, s.length() - 2);
-						String[] sa = s.split("\",\"");
-
-						Log.v("AusgabeSongs", s);
-
 						nachr.obj = s.toString();
 						mHandler.sendMessage(nachr);
 					}
 					clientSocket.close();
-					Log.v("FINISH", "ClientSocket closed");
+					Log.v("AudioSuche", "ClientSocket closed");
 				} catch (Exception ex) {
 					Toast.makeText(getApplicationContext(), ex.toString(), 1)
 							.show();
@@ -132,7 +130,11 @@ public class MainActivity extends Activity {
 	 */
 	public void aktualisiereAnzeige(String serverNachricht) {
 		// Speichert den String als erstes Element des Spinners
-		ada.insert(serverNachricht, 0);
+		Log.v("AudioSuche", "Servernachricht:" + serverNachricht);
+		String s = serverNachricht;
+		s = s.replace("\\", "");
+		Log.v("AudioSuche", "FILE PATH:" + s);
+		ada.insert(s, 0);
 		// Speichert Spinnerdaten
 		// speichereDatei();
 	}
@@ -154,7 +156,6 @@ public class MainActivity extends Activity {
 		startActivity(newIntent);
 	}
 
-	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -164,9 +165,9 @@ public class MainActivity extends Activity {
 		eText[1] = (EditText) findViewById(R.id.editText2);
 		eText[2] = (EditText) findViewById(R.id.editText3);
 
-//		eText[0].setText("Suche nach Titel");
-//		eText[1].setText("Suche nach Kommentar");
-//		eText[2].setText("Maximale Groeße");
+		// eText[0].setText("Suche nach Titel");
+		// eText[1].setText("Suche nach Kommentar");
+		// eText[2].setText("Maximale Groeße");
 		for (EditText e : eText) {
 			e.setSelectAllOnFocus(true);
 		}
