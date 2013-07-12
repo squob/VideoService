@@ -197,10 +197,13 @@ public class MainActivity extends Activity implements OnItemClickListener {
 				// TODO Auto-generated method stub
 				try {
 					int filesize = 0;
-					int bytesRead;
+					int bytesRead = 0;
 					int current = 0;
 
-					clientSocket = new Socket("127.0.0.1", 5001);
+					clientSocket = new Socket("127.0.0.1", 5002);
+
+					Log.v("Verbindung",
+							" Der client ist : " + clientSocket.isConnected());
 					// Anfrage
 					irgendeinname2 = new PrintStream(
 							clientSocket.getOutputStream());
@@ -209,13 +212,19 @@ public class MainActivity extends Activity implements OnItemClickListener {
 					Log.v("AudioSucheD", "Speicherort: " + SAVEPATH
 							+ downloadSongName);
 
-					
 					// Antwort
 					InputStream is = clientSocket.getInputStream();
-					filesize = 13400000; // is.available();
+					filesize = 16; // is.available();
 					Log.v("Ausgelesen", "filesize ist " + filesize);
+					Log.v("Verbindung",
+							" Der client ist : " + clientSocket.isConnected());
 					byte[] mybytearray = new byte[filesize];
+					Log.v("Verbindung",
+							" Der client ist : " + clientSocket.isConnected());
+					Log.v("Ausgelesen", "mybytearray.lenght ist "
+							+ mybytearray.length);
 					bytesRead = is.read(mybytearray, 0, mybytearray.length);
+					Log.v("DEBUG", "1");
 					current = bytesRead;
 					Log.v("Ausgelesen", "Starte! mit bereits " + current
 							+ " bytes!");
