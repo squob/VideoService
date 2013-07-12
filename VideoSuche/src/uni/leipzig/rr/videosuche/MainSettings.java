@@ -22,8 +22,6 @@ public class MainSettings extends Activity{
 		// TODO Auto-generated method stub
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.settings);
-		
-		
 		et = (EditText)findViewById(R.id.eTsavePath);
 		SAVEPATH = Environment.getExternalStorageDirectory().getPath();
 		Log.v("ASSettings", "Speicherort: " + SAVEPATH);
@@ -33,6 +31,10 @@ public class MainSettings extends Activity{
 	public void saveAndBack(View view) throws IOException {
 		
 		File f = new File(SAVEPATH + "/pfad.txt");
+		if (!f.createNewFile()) {
+			f.delete();
+			f.createNewFile();
+		}
 		FileWriter fw = new FileWriter(f);
 		fw.write(et.getText().toString());
 		fw.close();

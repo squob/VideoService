@@ -57,11 +57,9 @@ public class MainActivity extends Activity implements OnItemClickListener {
 				try {
 					Long zahl = Long.MAX_VALUE;
 					clientSocket = new Socket("127.0.0.1", 5000);
-					Log.i("AudioSuche", "1");
+
 					jOkbject.put("Titel", eText[0].getText());
-					Log.i("AudioSuche", "2");
 					jOkbject.put("Kommentar", eText[1].getText());
-					Log.i("AudioSuche", "3");
 
 					if (!eText[2].getText().toString().isEmpty()) {
 						zahl = Long.parseLong(eText[2].getText().toString());
@@ -114,7 +112,6 @@ public class MainActivity extends Activity implements OnItemClickListener {
 			for (String string : data) {
 				aktualisiereAnzeige(string);
 			}
-
 		}
 	};
 
@@ -146,8 +143,7 @@ public class MainActivity extends Activity implements OnItemClickListener {
 		// TODO Auto-generated method stub
 		super.onResume();
 		try {
-			File f = new File(SAVEPATH + "/pfad.txt");
-			BufferedReader buff = new BufferedReader(new FileReader(f));
+			BufferedReader buff = new BufferedReader(new FileReader( new File(SAVEPATH + "/pfad.txt")));
 			SAVEPATH = buff.readLine();
 			buff.close();
 		} catch (Exception ex) {
@@ -160,7 +156,7 @@ public class MainActivity extends Activity implements OnItemClickListener {
 	@Override
 	public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
 		// TODO Auto-generated method stub
-		Log.v("AudioSuche", R.id.listView1 + ": and " + arg1.getId());
+
 		if (arg0.getId() == R.id.listView1) {
 			Log.v("AudioSuche", "Item wurde geklickt.");
 			startDownload(arg1, arg2);
@@ -177,45 +173,46 @@ public class MainActivity extends Activity implements OnItemClickListener {
 				.substring(downloadSong.lastIndexOf("/"));
 		Log.v("Ausgelesen", "NAME: " + downloadSongName);
 
+		File Ordner = new File(SAVEPATH);
+		Ordner.mkdir();
+
 		sT2 = new Thread(new Runnable() {
 			@Override
 			public void run() {
-				Log.v("AudioSucheD", "Speicherort: " + SAVEPATH);
+				FileWriter fw;
+				
 				Looper.prepare();
 				// TODO Auto-generated method stub
 				try {
 
 					clientSocket = new Socket("127.0.0.1", 5001);
 
-					Log.i("AudioSucheD", "1");
-					jOkbject2.put("Song", downloadSong);
-					Log.i("AudioSucheD", "2");
 					irgendeinname2 = new PrintStream(clientSocket
 							.getOutputStream());
-					Log.i("AudioSucheD", "AN CLIENT " + jOkbject2.toString());
-					irgendeinname2.println(jOkbject2.toString());
-
+					Log.i("AudioSucheD", "AN CLIENT " + downloadSong);
+					irgendeinname2.println(downloadSong);
+					Log.v("AudioSucheD", "Speicherort: " + SAVEPATH + downloadSongName);
 					BufferedReader bufferedReader = new BufferedReader(
 							new InputStreamReader(clientSocket.getInputStream()));
 					String str = bufferedReader.readLine();
-
+					File song = new File(SAVEPATH + downloadSongName);
+					fw = new FileWriter(song);
 					if (str.equals("null")) {
 						Toast.makeText(MainActivity.this,
 								"Kein Ergebnis. Such anständig",
 								Toast.LENGTH_SHORT).show();
 					} else {
-						while (!str.equals("")) {
-
+						while (!str.equals("EOF")) {
 							Log.v("AudioSucheD", "VOM SERVER:" + str);
-							File song = new File(SAVEPATH + downloadSongName);
+							fw.write(str);
 							str = bufferedReader.readLine();
 						}
+						fw.close();
 					}
 					clientSocket.close();
 					Log.v("AudioSucheD", "ClientSocket closed");
 				} catch (Exception ex) {
 					Log.e("AudioSucheD", "ERROR: " + ex.toString());
-					Toast.makeText(MainActivity.this, ex.toString(), 1).show();
 				}
 			}
 		});
