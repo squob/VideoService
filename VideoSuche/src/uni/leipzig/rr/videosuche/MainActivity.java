@@ -2,24 +2,14 @@ package uni.leipzig.rr.videosuche;
 
 import java.io.*;
 import java.net.*;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
 
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.database.DataSetObserver;
-import android.gesture.Gesture;
-import android.gesture.GestureLibraries;
-import android.gesture.GestureLibrary;
-import android.gesture.GestureOverlayView;
-import android.gesture.Prediction;
-import android.graphics.Color;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -27,17 +17,14 @@ import android.util.JsonReader;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.Adapter;
 import android.widget.ArrayAdapter;
-import android.widget.CheckBox;
 import android.widget.EditText;
-import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
 public class MainActivity extends Activity {
-
+	
+	String SAVEPATH; 
 	Thread sT, clientThread;
 	Socket clientSocket;
 	int filesize;
@@ -51,12 +38,13 @@ public class MainActivity extends Activity {
 	ListView ergebnisse;
 	PrintStream irgendeinname;
 	ArrayAdapter<String> ada;
-
+	
 	public void suchen(View view) {
 
 		sT = new Thread(new Runnable() {
 			@Override
 			public void run() {
+				Log.v("AudioSuche", "Speicherort: " + SAVEPATH);
 				Looper.prepare();
 				// TODO Auto-generated method stub
 				try {
@@ -158,6 +146,22 @@ public class MainActivity extends Activity {
 	}
 
 	@Override
+	protected void onResume() {
+		// TODO Auto-generated method stub
+		super.onResume();
+		try {
+			File f = new File(SAVEPATH + "/pfad.txt");
+			BufferedReader buff = new BufferedReader(new FileReader(f));
+			SAVEPATH = buff.readLine();
+			buff.close();
+		} catch (Exception ex) {
+			Log.w("AudioSuche", "Keine Datei am angegebenen Speicherort. (Beim ersten Lauf normal)");
+			SAVEPATH = Environment.getExternalStorageDirectory().getPath();
+		}
+		
+	}
+	
+	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
@@ -165,22 +169,22 @@ public class MainActivity extends Activity {
 		eText[0] = (EditText) findViewById(R.id.eTsavePath);
 		eText[1] = (EditText) findViewById(R.id.editText2);
 		eText[2] = (EditText) findViewById(R.id.editText3);
-
-		// eText[0].setText("Suche nach Titel");
-		// eText[1].setText("Suche nach Kommentar");
-		// eText[2].setText("Maximale Groeﬂe");
+		
+		SAVEPATH = Environment.getExternalStorageDirectory().getPath();
+		Log.v("AudioSuche", "Speicherort: " + SAVEPATH);
+	
+		
 		for (EditText e : eText) {
 			e.setSelectAllOnFocus(true);
 		}
+		
 		jOkbject = new JSONObject();
-
+		
 		ada = new ArrayAdapter<String>(this,
 				android.R.layout.simple_list_item_1);
 		ergebnisse = (ListView) findViewById(R.id.listView1);
 		ergebnisse.setAdapter(ada);
-		// Intent intent = new Intent(getApplicationContext(),
-		// GestureActivity.class);
-		// startActivity(intent);
+
 	}
 
 	@Override
@@ -189,70 +193,4 @@ public class MainActivity extends Activity {
 		getMenuInflater().inflate(R.menu.main, menu);
 		return true;
 	}
-
-	// Thread sT;
-	// GestureLibrary gestureLib;
-	// String JSONString;
-	// String resultString;
-	// JSONObject jOkbject;
-	// EditText eText;
-	// CheckBox cBoxTitel;
-	// CheckBox cBoxKommentar;
-
-	// @Override
-	// protected void onCreate(Bundle savedInstanceState) {
-	// // TODO Auto-generated method stub
-	// super.onCreate(savedInstanceState);
-	//
-	// eText = (EditText)findViewById(R.id.editText1);
-	// eText.setText("Hier Suchbegriffe eingeben..");
-	// eText.setSelectAllOnFocus(true);
-	// cBoxTitel = (CheckBox)findViewById(R.id.suchTitel);
-	// cBoxKommentar = (CheckBox)findViewById(R.id.suchKommentar);
-	//
-	// GestureOverlayView gestureOverlayView = new GestureOverlayView(this);
-	// View inflate = getLayoutInflater().inflate(R.layout.activity_main, null);
-	// Toast.makeText(getApplicationContext(), "CREATED!", 0).show();
-	// gestureOverlayView.setGestureColor(Color.rgb(0, 255, 0));
-	// gestureOverlayView.setGestureVisible(false);
-	// gestureOverlayView.setUncertainGestureColor(Color.rgb(0, 0, 255));
-	//
-	// gestureOverlayView.addView(inflate);
-	// gestureOverlayView.addOnGesturePerformedListener(this);
-	//
-	// gestureLib = GestureLibraries.fromRawResource(this, R.raw.gestures);
-	//
-	// if(!gestureLib.load()) {
-	// Log.i("debug", "failed");
-	// }
-	// else {
-	// Log.i("debug","loaded");
-	// }
-	//
-	// setContentView(gestureOverlayView);
-	// Log.i("debug","onCreate");
-	//
-	// }
-
-	// @Override
-	// public void onGesturePerformed(GestureOverlayView arg0, Gesture g) {
-	// // TODO Auto-generated method stub
-	// ArrayList<Prediction> predictions = gestureLib.recognize(g);
-	//
-	// if (predictions.size() > 0) {
-	// Prediction prediction= predictions.get(0);
-	//
-	// if (prediction.score > 1) {
-	// String s = prediction.name;
-	// if (s.equals("left")) {
-	// Toast.makeText(getApplicationContext(), "links", 0).show();
-	// }
-	// else if (s.equals("right")) {
-	// Toast.makeText(getApplicationContext(), "rechts", 0).show();
-	// }
-	// }
-	//
-	// }
-	// }
-
 }
