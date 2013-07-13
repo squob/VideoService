@@ -72,10 +72,10 @@ public class VideoActivity extends ListActivity {
 	}
 	/**
 	 * Spielt die Datei im Media Player ab
-	 * @param ort Pfad zur Datei
+	 * @param selectedValue Pfad zur Datei
 	 */
-	public void startPlayer(String ort){
-		 Uri intentUri = Uri.parse(ort);		    
+	public void startPlayer(String selectedValue){
+		 Uri intentUri =  Uri.parse(selectedValue);		    
 	     Intent intent = new Intent();
 	     intent.setAction(Intent.ACTION_VIEW);
 	     intent.setDataAndType(intentUri, "video/mp4");

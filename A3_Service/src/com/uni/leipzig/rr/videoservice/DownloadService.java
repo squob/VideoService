@@ -100,7 +100,7 @@ public class DownloadService extends Service  {
 				try {
 					// Verbindungsaufbau mit dem Client und uebergabe der
 					// Zufallszahl
-					server = new ServerSocket(5001);
+					server = new ServerSocket(5002);
 					while (true) {
 						Socket connectedSocket = server.accept();
 						BufferedReader bufferedReader = 
