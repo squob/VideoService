@@ -29,6 +29,7 @@ public class MainSettings extends Activity{
 	
 	
 	public void saveAndBack(View view) throws IOException {
+		SAVEPATH = Environment.getExternalStorageDirectory().getPath();
 		Log.v("ASSettings", "Speicherort: " + SAVEPATH+File.separator+et.getText() +"###########");
 		File directory = new File(SAVEPATH+File.separator+et.getText() );
 	    if(!directory.exists() && !directory.isDirectory()) 
@@ -46,8 +47,7 @@ public class MainSettings extends Activity{
 	    {
 	        Log.i("Erstelle Verzeichnis","Verzeichnis schon vorhanden");
 	    }
-		
-		
+
 		File f = new File(SAVEPATH + "/pfad.txt");
 		if (!f.createNewFile()) {
 			f.delete();

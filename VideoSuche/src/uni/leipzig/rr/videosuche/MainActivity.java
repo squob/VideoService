@@ -9,6 +9,7 @@ import org.json.JSONObject;
 import android.app.Activity;
 import android.app.LauncherActivity.ListItem;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -31,7 +32,7 @@ public class MainActivity extends Activity implements OnItemClickListener {
 	String SAVEPATH;
 	Thread sT, sT2, clientThread;
 	Socket clientSocket;
-	int filesize;
+	int filesize = 13348812;
 	int bytesRead, current;
 	String JSONString;
 	String resultString;
@@ -112,7 +113,9 @@ public class MainActivity extends Activity implements OnItemClickListener {
 			String[] data = nachricht.obj.toString().split("\",\"");
 			loescheAnzeige();
 			for (String string : data) {
+				if(string !=""){
 				aktualisiereAnzeige(string);
+				}
 			}
 		}
 	};
@@ -140,29 +143,31 @@ public class MainActivity extends Activity implements OnItemClickListener {
 		startActivity(newIntent);
 	}
 
-	@Override
-	protected void onResume() {
-		// TODO Auto-generated method stub
-		super.onResume();
-		try {
-			BufferedReader buff = new BufferedReader(new FileReader(new File(
-					SAVEPATH + "/pfad.txt")));
-			SAVEPATH = buff.readLine();
-			buff.close();
-		} catch (Exception ex) {
-			Log.w("AudioSuche",
-					"Keine Datei am angegebenen Speicherort. (Beim ersten Lauf ist das normal)");
-			SAVEPATH = Environment.getExternalStorageDirectory().getPath();
-		}
-	}
+//	@Override
+//	protected void onResume() {
+//		// TODO Auto-generated method stub
+//		super.onResume();
+//		try {
+//			BufferedReader buff = new BufferedReader(new FileReader(new File(
+//					SAVEPATH + "/pfad.txt")));
+//			SAVEPATH = buff.readLine();
+//			buff.close();
+//			Log.v("AUS","AUS DATEI:"+SAVEPATH);
+//		} catch (Exception ex) {
+//			Log.w("AudioSuche",
+//					"Keine Datei am angegebenen Speicherort. (Beim ersten Lauf ist das normal)");
+//			SAVEPATH = Environment.getExternalStorageDirectory().getPath();
+//		}
+//	}
 
 	@Override
 	public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
 		// TODO Auto-generated method stub
-
+		
 		if (arg0.getId() == R.id.listView1) {
+			
 			Log.v("AudioSuche", "Item wurde geklickt.");
-
+					
 			try {
 				prepareDownload(arg2);
 			} catch (IOException e1) {
@@ -170,7 +175,7 @@ public class MainActivity extends Activity implements OnItemClickListener {
 				e1.printStackTrace();
 			}
 			startDownload(arg1);
-
+			
 		}
 	}
 
@@ -183,79 +188,92 @@ public class MainActivity extends Activity implements OnItemClickListener {
 		Log.v("Ausgelesen", downloadSong);
 		downloadSongName = downloadSong
 				.substring(downloadSong.lastIndexOf("/"));
-		Log.v("Ausgelesen", "NAME: " + downloadSongName);
+		Log.v("Ausgelesen", "NAME TEY: " + downloadSongName);
 		song = new File(SAVEPATH + downloadSongName);
-		FileOutputStream fw = new FileOutputStream(song);
 	}
 
 	public void startDownload(View view) {
-		sT2 = new Thread(new Runnable() {
-			@Override
+		try {
+			BufferedReader buff = new BufferedReader(new FileReader(new File(
+					SAVEPATH + "/pfad.txt")));
+			SAVEPATH = Environment.getExternalStorageDirectory().getPath()+File.separator;
+			SAVEPATH += buff.readLine();
+			buff.close();
+			Log.v("AUS","AUS DATEI:"+SAVEPATH);
+		} catch (Exception ex) {
+			Log.v("AudioSuche",
+					"Keine Datei am angegebenen Speicherort. (Beim ersten Lauf ist das normal)");
+			SAVEPATH = Environment.getExternalStorageDirectory().getPath();
+		
+		}
+		
+		
+		clientThread = new Thread(new Runnable() {
+			/**
+			 * Starten des Threads, hierbei wird aus Port 5000 des Localhost gelauscht
+			 */
+			
 			public void run() {
-
-				Looper.prepare();
-				// TODO Auto-generated method stub
+				
+				String str ="";
 				try {
-					int filesize = 0;
-					int bytesRead = 0;
-					int current = 0;
+					clientSocket = new Socket("127.0.0.1", 5001);
+					int filesize=6022386; // filesize temporary hardcoded
 
-					clientSocket = new Socket("127.0.0.1", 5002);
-
-					Log.v("Verbindung",
-							" Der client ist : " + clientSocket.isConnected());
-					// Anfrage
-					irgendeinname2 = new PrintStream(
+				    long start = System.currentTimeMillis();
+				    int bytesRead;
+				    int current = 0;
+				    PrintStream raus = new PrintStream(
 							clientSocket.getOutputStream());
-					Log.i("AudioSucheD", "AN CLIENT " + downloadSong);
-					irgendeinname2.println(downloadSong);
-					Log.v("AudioSucheD", "Speicherort: " + SAVEPATH
-							+ downloadSongName);
 
-					// Antwort
-					InputStream is = clientSocket.getInputStream();
-					filesize = 16; // is.available();
-					Log.v("Ausgelesen", "filesize ist " + filesize);
-					Log.v("Verbindung",
-							" Der client ist : " + clientSocket.isConnected());
-					byte[] mybytearray = new byte[filesize];
-					Log.v("Verbindung",
-							" Der client ist : " + clientSocket.isConnected());
-					Log.v("Ausgelesen", "mybytearray.lenght ist "
-							+ mybytearray.length);
-					bytesRead = is.read(mybytearray, 0, mybytearray.length);
-					Log.v("DEBUG", "1");
-					current = bytesRead;
-					Log.v("Ausgelesen", "Starte! mit bereits " + current
-							+ " bytes!");
-					do {
-						System.out.print("|");
-						bytesRead = is.read(mybytearray, current,
-								(mybytearray.length - current));
-						if (bytesRead >= 0)
-							current += bytesRead;
-					} while (bytesRead > -1);
+					Log.v("Moechte ich", downloadSong);
+					raus.println(downloadSong);
+				    // localhost for testing
+				    System.out.println("Connecting...");
 
-					fw.write(mybytearray, 0, current);
-					fw.flush();
+				    // receive file
+				    byte [] mybytearray  = new byte [filesize];
+				    InputStream is = clientSocket.getInputStream();
+				    str = SAVEPATH+downloadSongName;
+				    Log.v("STR",str);
+				    FileOutputStream fos = new FileOutputStream(str);
+				    BufferedOutputStream bos = new BufferedOutputStream(fos);
+				    bytesRead = is.read(mybytearray,0,mybytearray.length);
+				    current = bytesRead;
+				    do {
+				       bytesRead =
+				          is.read(mybytearray, current, (mybytearray.length-current));
+				       if(bytesRead >= 0) current += bytesRead;
+				    } while(bytesRead > -1);
 
-					Log.v("Ausgelesen", "Fertig!");
-					is.close();
-					clientSocket.close();
-					Log.v("AudioSucheD", "ClientSocket closed");
-				} catch (Exception ex) {
-					Log.e("AudioSucheD", "ERROR: " + ex.toString());
-				}
-				try {
-					fw.close();
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
+				    bos.write(mybytearray, 0 , current);
+				    bos.flush();
+				    long end = System.currentTimeMillis();
+				    System.out.println(end-start);
+				    System.out.println("Fertig");
+				    bos.close();
+				    Log.v("FERTIG", "TADAAAA FERTIG");
+				    clientSocket.close();
+
+					 Log.v("PLAYER BEKOMMT:",str);
+					 startPlayer(str);	
+				} catch (Exception e) {
 					e.printStackTrace();
 				}
 			}
 		});
-		sT2.start();
+		
+		clientThread.start();
+		
 	}
+	
+	public void startPlayer(String ort){
+Uri intentUri = Uri.parse(ort);	
+Intent intent = new Intent();
+intent.setAction(Intent.ACTION_VIEW);
+intent.setDataAndType(intentUri, "video/mp4");
+startActivity(intent);
+}
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
