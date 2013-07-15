@@ -14,9 +14,14 @@ import android.widget.EditText;
 
 public class MainSettings extends Activity{
 	
-	String SAVEPATH;
-	EditText et;
+	// temporäre Variablen
+	String SAVEPATH; 
+	EditText et; 
 	
+	/**
+	 * Beim Starten wird der Speicherort geladen.
+	 * 
+	 */
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		// TODO Auto-generated method stub
@@ -27,7 +32,13 @@ public class MainSettings extends Activity{
 		Log.v("ASSettings", "Speicherort: " + SAVEPATH);
 	}
 	
-	
+	/**
+	 * Einzig interessante Funktion. Reagiert auf klick auf Speichern und Zurueck Button. 
+	 * Es wird der gwünschte Speicherort erstellt und in der Pfad.txt gespeichert.
+	 * 
+	 * @param view Der aktuelle view
+	 * @throws IOException Fehler beim abspeichern der Pfad.txt
+	 */
 	public void saveAndBack(View view) throws IOException {
 		SAVEPATH = Environment.getExternalStorageDirectory().getPath();
 		Log.v("ASSettings", "Speicherort: " + SAVEPATH+File.separator+et.getText() +"###########");

@@ -49,6 +49,13 @@ public class MainActivity extends Activity implements OnItemClickListener {
 	File song;
 	FileOutputStream fw;
 
+	/**
+	 * Fragt den Server mit eingegebenen Such-Parameteren nach Videos ab. Bei
+	 * keiner Größenangabe wird das Maximum von Long genommen.
+	 * 
+	 * @param view
+	 *            aktueller View
+	 */
 	public void suchen(View view) {
 
 		sT = new Thread(new Runnable() {
@@ -106,20 +113,34 @@ public class MainActivity extends Activity implements OnItemClickListener {
 		sT.start();
 	}
 
-	// Uebergibt die Nachricht
+	/**
+	 * Haendelt die Ergebnissausgabe
+	 * 
+	 */
 	Handler mHandler = new Handler() {
+		/**
+		 * Liest die auszugebenen Nachrichten.
+		 * 
+		 * @param nachricht
+		 *            nachricht, die Ausgegeben wird. Mehrere durch , getrennt.
+		 */
 		public void handleMessage(Message nachricht) {
 			Log.v("AusgabeSongs", nachricht.obj.toString());
 			String[] data = nachricht.obj.toString().split("\",\"");
 			loescheAnzeige();
 			for (String string : data) {
-				if(string !=""){
-				aktualisiereAnzeige(string);
+				if (string != "") {
+					aktualisiereAnzeige(string);
 				}
 			}
 		}
 	};
 
+	/**
+	 * Daten werden ausgegeben.
+	 * 
+	 * @param serverNachricht
+	 */
 	public void aktualisiereAnzeige(String serverNachricht) {
 		// Speichert den String als erstes Element des Spinners
 		Log.v("AudioSuche", "Servernachricht:" + serverNachricht);
@@ -131,6 +152,9 @@ public class MainActivity extends Activity implements OnItemClickListener {
 		// speichereDatei();
 	}
 
+	/**
+	 * Listview wird geloescht.
+	 */
 	public void loescheAnzeige() {
 		// Speichert den String als erstes Element des Spinners
 		ada.clear();
@@ -138,36 +162,29 @@ public class MainActivity extends Activity implements OnItemClickListener {
 		// speichereDatei();
 	}
 
+	/**
+	 * Funktion die bei Button "Set" aufgerufen wird. Startet dann Intent fur
+	 * Dettings Seite.
+	 * 
+	 * @param view
+	 */
 	public void whereAreMySettings(View view) {
 		Intent newIntent = new Intent(this, MainSettings.class);
 		startActivity(newIntent);
 	}
 
-//	@Override
-//	protected void onResume() {
-//		// TODO Auto-generated method stub
-//		super.onResume();
-//		try {
-//			BufferedReader buff = new BufferedReader(new FileReader(new File(
-//					SAVEPATH + "/pfad.txt")));
-//			SAVEPATH = buff.readLine();
-//			buff.close();
-//			Log.v("AUS","AUS DATEI:"+SAVEPATH);
-//		} catch (Exception ex) {
-//			Log.w("AudioSuche",
-//					"Keine Datei am angegebenen Speicherort. (Beim ersten Lauf ist das normal)");
-//			SAVEPATH = Environment.getExternalStorageDirectory().getPath();
-//		}
-//	}
-
+	/**
+	 * Wenn ein Item auf der ListView angeklickt wird. Startet mit Uebergabe vom
+	 * Namen den Download.
+	 */
 	@Override
 	public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
 		// TODO Auto-generated method stub
-		
+
 		if (arg0.getId() == R.id.listView1) {
-			
+
 			Log.v("AudioSuche", "Item wurde geklickt.");
-					
+
 			try {
 				prepareDownload(arg2);
 			} catch (IOException e1) {
@@ -175,10 +192,15 @@ public class MainActivity extends Activity implements OnItemClickListener {
 				e1.printStackTrace();
 			}
 			startDownload(arg1);
-			
+
 		}
 	}
 
+	/**
+	 * Bereitet den Download vor. Stellt hauptsaechlich die Pfade zusammen.
+	 * @param l Position des ausgewaehlten Elements
+	 * @throws IOException
+	 */
 	public void prepareDownload(int l) throws IOException {
 		File Ordner = new File(SAVEPATH);
 		Ordner.mkdir();
@@ -192,89 +214,102 @@ public class MainActivity extends Activity implements OnItemClickListener {
 		song = new File(SAVEPATH + downloadSongName);
 	}
 
+	/**
+	 * Start des Downloads. Ueberprueft erst Speicherort.
+	 * @param view
+	 */
 	public void startDownload(View view) {
 		try {
 			BufferedReader buff = new BufferedReader(new FileReader(new File(
 					SAVEPATH + "/pfad.txt")));
-			SAVEPATH = Environment.getExternalStorageDirectory().getPath()+File.separator;
+			SAVEPATH = Environment.getExternalStorageDirectory().getPath()
+					+ File.separator;
 			SAVEPATH += buff.readLine();
 			buff.close();
-			Log.v("AUS","AUS DATEI:"+SAVEPATH);
+			Log.v("AUS", "AUS DATEI:" + SAVEPATH);
 		} catch (Exception ex) {
 			Log.v("AudioSuche",
 					"Keine Datei am angegebenen Speicherort. (Beim ersten Lauf ist das normal)");
 			SAVEPATH = Environment.getExternalStorageDirectory().getPath();
-		
+
 		}
-		
-		
+
 		clientThread = new Thread(new Runnable() {
 			/**
-			 * Starten des Threads, hierbei wird aus Port 5000 des Localhost gelauscht
+			 * Starten des Threads, hierbei wird aus Port 5001 des Localhost
+			 * gelauscht
 			 */
-			
+
 			public void run() {
-				
-				String str ="";
+
+				String str = "";
 				try {
 					clientSocket = new Socket("127.0.0.1", 5001);
-					int filesize=6022386; // filesize temporary hardcoded
-
-				    long start = System.currentTimeMillis();
-				    int bytesRead;
-				    int current = 0;
-				    PrintStream raus = new PrintStream(
+					int filesize = 6022386; // filesize temporary hardcoded
+					
+					long start = System.currentTimeMillis();
+					int bytesRead;
+					int current = 0;
+					PrintStream raus = new PrintStream(
 							clientSocket.getOutputStream());
 
 					Log.v("Moechte ich", downloadSong);
 					raus.println(downloadSong);
-				    // localhost for testing
-				    System.out.println("Connecting...");
+					// localhost for testing
+					System.out.println("Connecting...");
 
-				    // receive file
-				    byte [] mybytearray  = new byte [filesize];
-				    InputStream is = clientSocket.getInputStream();
-				    str = SAVEPATH+downloadSongName;
-				    Log.v("STR",str);
-				    FileOutputStream fos = new FileOutputStream(str);
-				    BufferedOutputStream bos = new BufferedOutputStream(fos);
-				    bytesRead = is.read(mybytearray,0,mybytearray.length);
-				    current = bytesRead;
-				    do {
-				       bytesRead =
-				          is.read(mybytearray, current, (mybytearray.length-current));
-				       if(bytesRead >= 0) current += bytesRead;
-				    } while(bytesRead > -1);
+					// receive file
+					byte[] mybytearray = new byte[filesize];
+					InputStream is = clientSocket.getInputStream();
+					str = SAVEPATH + downloadSongName;
+					Log.v("STR", str);
+					FileOutputStream fos = new FileOutputStream(str);
+					BufferedOutputStream bos = new BufferedOutputStream(fos);
+					bytesRead = is.read(mybytearray, 0, mybytearray.length);
+					current = bytesRead;
+					do {
+						bytesRead = is.read(mybytearray, current,
+								(mybytearray.length - current));
+						if (bytesRead >= 0)
+							current += bytesRead;
+					} while (bytesRead > -1);
 
-				    bos.write(mybytearray, 0 , current);
-				    bos.flush();
-				    long end = System.currentTimeMillis();
-				    System.out.println(end-start);
-				    System.out.println("Fertig");
-				    bos.close();
-				    Log.v("FERTIG", "TADAAAA FERTIG");
-				    clientSocket.close();
+					bos.write(mybytearray, 0, current);
+					bos.flush();
+					long end = System.currentTimeMillis();
+					System.out.println(end - start);
+					System.out.println("Fertig");
+					bos.close();
+					Log.v("FERTIG", "TADAAAA FERTIG");
+					clientSocket.close();
 
-					 Log.v("PLAYER BEKOMMT:",str);
-					 startPlayer(str);	
+					Log.v("PLAYER BEKOMMT:", str);
+					startPlayer(str);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
 			}
 		});
-		
-		clientThread.start();
-		
-	}
-	
-	public void startPlayer(String ort){
-Uri intentUri = Uri.parse(ort);	
-Intent intent = new Intent();
-intent.setAction(Intent.ACTION_VIEW);
-intent.setDataAndType(intentUri, "video/mp4");
-startActivity(intent);
-}
 
+		clientThread.start();
+
+	}
+
+	/**
+	 * Funktion zum Starten des Players mit ausgewaehltem Video.
+	 * @param ort
+	 */
+	public void startPlayer(String ort) {
+		Uri intentUri = Uri.parse(ort);
+		Intent intent = new Intent();
+		intent.setAction(Intent.ACTION_VIEW);
+		intent.setDataAndType(intentUri, "video/mp4");
+		startActivity(intent);
+	}
+
+	/**
+	 * Beim starten. Erstellt hauptsaechlich Objekte und legt Stardarts fest. 
+	 */
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -304,6 +339,9 @@ startActivity(intent);
 		downloadSong = "";
 	}
 
+	/**
+	 *  Der Inflater.
+	 */
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
